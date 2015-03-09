@@ -92,28 +92,18 @@ class hokuyo3d_node
 				cloud2.data.resize((cloud2.width + index[range_index.nspots])
 					   	* cloud2.point_step);
 
-				sensor_msgs::PointCloud2Iterator<float> iter_x(cloud2, "x");
-				sensor_msgs::PointCloud2Iterator<float> iter_y(cloud2, "y");
-				sensor_msgs::PointCloud2Iterator<float> iter_z(cloud2, "z");
-				sensor_msgs::PointCloud2Iterator<float> iter_i(cloud2, "intensity");
-				iter_x += cloud2.width;
-				iter_y += cloud2.width;
-				iter_z += cloud2.width;
-				iter_i += cloud2.width;
+				float *data = reinterpret_cast<float*>(&cloud2.data[0]);
+				data += cloud2.width * cloud2.point_step / sizeof(float);
 				for(int i = 0; i < index[range_index.nspots]; i ++)
 				{
 					if(points[i].r < range_min)
 					{
 						continue;
 					}
-					*iter_x = points[i].x;
-					*iter_y = points[i].y;
-					*iter_z = points[i].z;
-					*iter_i = points[i].i;
-					++iter_x;
-					++iter_y;
-					++iter_z;
-					++iter_i;
+					*(data++) = points[i].x;
+					*(data++) = points[i].y;
+					*(data++) = points[i].z;
+					*(data++) = points[i].i;
 					cloud2.width ++;
 				}
 				cloud2.row_step = cloud2.width * cloud2.point_step;

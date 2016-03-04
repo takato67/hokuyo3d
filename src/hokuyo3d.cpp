@@ -27,24 +27,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <boost/bind.hpp>
-#include <mutex>
+#include <boost/bind.hpp>				//boost that C++ library is widely used in the ROS codebase. bind.hpp can bind any argument.
+#include <mutex>					//mutual exclusion
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/point_cloud2_iterator.h>
-#include <sensor_msgs/MagneticField.h>
+#include <sensor_msgs/point_cloud2_iterator.h>		//like array. repetetion prosessing abstract.
+#include <sensor_msgs/MagneticField.h>			//magnetic field
 #include <sensor_msgs/Imu.h>
-#include <sensor_msgs/point_cloud_conversion.h>
+#include <sensor_msgs/point_cloud_conversion.h>		//point cloud header
 
-#include "vssp.hpp"
+#include "vssp.hpp"					//format array,etc.
 
 
-class hokuyo3d_node
+class hokuyo3d_node					//hokuyo3d_node class
 {
 	public:
-		void cbPoint(
-				const vssp::header &header, 			//vssp.hpp
+		void cbPoint(				
+				const vssp::header &header, 			
 				const vssp::range_header &range_header, 
 				const vssp::range_index &range_index,
 				const boost::shared_array<uint16_t> &index,

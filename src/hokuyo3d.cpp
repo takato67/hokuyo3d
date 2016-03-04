@@ -43,7 +43,7 @@
 class hokuyo3d_node					//hokuyo3d_node class
 {
 	public:
-		void cbPoint(				
+		void cbPoint(					//detect points and pulish points
 				const vssp::header &header, 			
 				const vssp::range_header &range_header, 
 				const vssp::range_index &range_index,
@@ -51,33 +51,33 @@ class hokuyo3d_node					//hokuyo3d_node class
 				const boost::shared_array<vssp::xyzi> &points,
 				const std::chrono::microseconds &delayRead)
 		{
-			if(timestampBase == ros::Time(0)) return;
+			if(timestampBase == ros::Time(0)) return;			//not run initially
 			// Pack scan data
-			if(enablePc)
+			if(enablePc)							//enablePc is flag
 			{
-				if(cloud.points.size() == 0)
+				if(cloud.points.size() == 0)				//point's size is 0
 				{
 					// Start packing PointCloud message
-					cloud.header.frame_id = frame_id;
-					cloud.header.stamp = timestampBase
-						+ ros::Duration(range_header.line_head_timestamp_ms * 0.001);
+					cloud.header.frame_id = frame_id;		//frame id , rviz
+					cloud.header.stamp = timestampBase		//timestamp
+						+ ros::Duration(range_header.line_head_timestamp_ms * 0.001);		//set timestamp
 				}
 				// Pack PointCloud message
-				for(int i = 0; i < index[range_index.nspots]; i ++)
+				for(int i = 0; i < index[range_index.nspots]; i ++)	//range_index.nspots for array
 				{
-					if(points[i].r < range_min)
+					if(points[i].r < range_min)			//continue
 					{
-						continue;
+						continue;				//skip below prosess
 					}
-					geometry_msgs::Point32 point;
+					geometry_msgs::Point32 point;			
 					point.x = points[i].x;
 					point.y = points[i].y;
 					point.z = points[i].z;
-					cloud.points.push_back(point);
-					cloud.channels[0].values.push_back(points[i].i);
+					cloud.points.push_back(point);			//cloud input value
+					cloud.channels[0].values.push_back(points[i].i);//cloud input value
 				}
 			}
-			if(enablePc2)					//pcl2 messages
+			if(enablePc2)					//pcl2 messages. almost like pcl.
 			{
 				if(cloud2.data.size() == 0)
 				{
@@ -108,13 +108,14 @@ class hokuyo3d_node					//hokuyo3d_node class
 				}
 				cloud2.row_step = cloud2.width * cloud2.point_step;
 			}
+			ROS_INFO("test1");
 			// Publish points
 			if((cycle == CYCLE_FIELD &&
 						(range_header.field != field ||
 						 range_header.frame != frame)) ||
 					(cycle == CYCLE_FRAME &&
 						(range_header.frame != frame)) ||
-					(cycle == CYCLE_LINE))
+					(cycle == CYCLE_LINE))				//condition flag
 			{
 				if(enablePc)
 				{
@@ -127,8 +128,9 @@ class hokuyo3d_node					//hokuyo3d_node class
 					cloud2.data.resize(cloud2.width * cloud2.point_step);
 					pubPc2.publish(cloud2);					//pcl2 pub
 					cloud2.data.clear();
+					ROS_INFO("ctl2 pub succes");
 				}
-				if(range_header.frame != frame) ping();
+				if(range_header.frame != frame) ping();		//stream string msg
 				frame = range_header.frame;
 				field = range_header.field;
 				line = range_header.line;

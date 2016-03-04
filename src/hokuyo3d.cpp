@@ -44,7 +44,7 @@ class hokuyo3d_node
 {
 	public:
 		void cbPoint(
-				const vssp::header &header, 
+				const vssp::header &header, 			//vssp.hpp
 				const vssp::range_header &range_header, 
 				const vssp::range_index &range_index,
 				const boost::shared_array<uint16_t> &index,
@@ -77,7 +77,7 @@ class hokuyo3d_node
 					cloud.channels[0].values.push_back(points[i].i);
 				}
 			}
-			if(enablePc2)
+			if(enablePc2)					//pcl2 messages
 			{
 				if(cloud2.data.size() == 0)
 				{
@@ -125,7 +125,7 @@ class hokuyo3d_node
 				if(enablePc2)
 				{
 					cloud2.data.resize(cloud2.width * cloud2.point_step);
-					pubPc2.publish(cloud2);
+					pubPc2.publish(cloud2);					//pcl2 pub
 					cloud2.data.clear();
 				}
 				if(range_header.frame != frame) ping();
@@ -134,7 +134,7 @@ class hokuyo3d_node
 				line = range_header.line;
 			}
 		};
-		void cbPing(const vssp::header &header, const std::chrono::microseconds &delayRead)
+		void cbPing(const vssp::header &header, const std::chrono::microseconds &delayRead)			//time function
 		{
 			ros::Time now = ros::Time::now() - ros::Duration(delayRead.count() * 0.001 * 0.001);
 			ros::Duration delay = ((now - timePing)
@@ -143,7 +143,7 @@ class hokuyo3d_node
 			if(timestampBase == ros::Time(0)) timestampBase = base;
 			else timestampBase += (base - timestampBase) * 0.01;
 		}
-		void cbAux(
+		void cbAux(							//maybe imu message
 				const vssp::header &header, 
 				const vssp::aux_header &aux_header, 
 				const boost::shared_array<vssp::aux> &auxs,
@@ -184,7 +184,7 @@ class hokuyo3d_node
 				}
 			}
 		};
-		void cbConnect(bool success)
+		void cbConnect(bool success)					//driver function for connection
 		{
 			if(success)
 			{
@@ -203,11 +203,11 @@ class hokuyo3d_node
 				ROS_ERROR("Connection failed");
 			}
 		};
-		hokuyo3d_node() :
+		hokuyo3d_node() :						//declaer node class
 			nh("~"),
 			timestampBase(0)
 		{
-			nh.param("interlace", interlace, 4);
+			nh.param("interlace", interlace, 4);				//param set
 			nh.param("ip", ip, std::string("192.168.0.10"));
 			nh.param("port", port, 10940);
 			nh.param("frame_id", frame_id, std::string("hokuyo3d"));
@@ -229,7 +229,7 @@ class hokuyo3d_node
 			}
 
 			driver.setTimeout(2.0);
-			ROS_INFO("Connecting to %s", ip.c_str());
+			ROS_INFO("Connecting to %s", ip.c_str());		//initial print and Callback function
 			driver.connect(ip.c_str(), port, 
 					boost::bind(&hokuyo3d_node::cbConnect, this, _1));
 			driver.registerCallback(
@@ -361,6 +361,7 @@ int main(int argc, char **argv)
 	{
 		if(!node.poll()) break;
 		ros::spinOnce();
+		hokuyo3d_node::cbSubscriber();
 		wait.sleep();
 	}
 

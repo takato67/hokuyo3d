@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 	{
 		if(!node.poll()) break;
 		ros::spinOnce();
-		hokuyo3d_node::cbSubscriber();
+		hokuyo3d_node::cbSubscriber;
 		wait.sleep();
 	}
 

@@ -155,10 +155,10 @@ class hokuyo3d_node					//hokuyo3d_node class
 			ros::Time stamp = timestampBase + ros::Duration(aux_header.timestamp_ms * 0.001);
 
 			if((aux_header.data_bitfield & (vssp::AX_MASK_ANGVEL | vssp::AX_MASK_LINACC))
-					== (vssp::AX_MASK_ANGVEL | vssp::AX_MASK_LINACC))
+					== (vssp::AX_MASK_ANGVEL | vssp::AX_MASK_LINACC))			//flag
 			{
-				imu.header.frame_id = frame_id;
-				imu.header.stamp = stamp;
+				imu.header.frame_id = frame_id;				//imu frame_id
+				imu.header.stamp = stamp;				//imu timestmap
 				for(int i = 0; i < aux_header.data_count; i ++)
 				{
 					imu.orientation_covariance[0] = -1.0;

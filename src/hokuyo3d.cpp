@@ -161,85 +161,85 @@ class hokuyo3d_node					//hokuyo3d_node class
 				imu.header.stamp = stamp;				//imu timestmap
 				for(int i = 0; i < aux_header.data_count; i ++)
 				{
-					imu.orientation_covariance[0] = -1.0;
+					imu.orientation_covariance[0] = -1.0;		//detect inertial matlix or array
 					imu.angular_velocity.x = auxs[i].ang_vel.x;
 					imu.angular_velocity.y = auxs[i].ang_vel.y;
 					imu.angular_velocity.z = auxs[i].ang_vel.z;
 					imu.linear_acceleration.x = auxs[i].lin_acc.x;
 					imu.linear_acceleration.y = auxs[i].lin_acc.y;
 					imu.linear_acceleration.z = auxs[i].lin_acc.z;
-					pubImu.publish(imu);
-					imu.header.stamp += ros::Duration(aux_header.data_ms * 0.001);
+					pubImu.publish(imu);				//pub imu data
+					imu.header.stamp += ros::Duration(aux_header.data_ms * 0.001);	//time stamp
 				}
 			}
 			if((aux_header.data_bitfield & vssp::AX_MASK_MAG) == vssp::AX_MASK_MAG )
 			{
-				mag.header.frame_id = frame_id;
-				mag.header.stamp = stamp;
+				mag.header.frame_id = frame_id;				//magnetic frame_id
+				mag.header.stamp = stamp;				//timestamp
 				for(int i = 0; i < aux_header.data_count; i ++)
 				{
-					mag.magnetic_field.x = auxs[i].mag.x;
+					mag.magnetic_field.x = auxs[i].mag.x;		//magnetic array
 					mag.magnetic_field.y = auxs[i].mag.y;
 					mag.magnetic_field.z = auxs[i].mag.z;
-					pubMag.publish(mag);
-					mag.header.stamp += ros::Duration(aux_header.data_ms * 0.001);
+					pubMag.publish(mag);				//pub magnetic
+					mag.header.stamp += ros::Duration(aux_header.data_ms * 0.001);	//timestamp
 				}
 			}
 		};
-		void cbConnect(bool success)					//driver function for connection
+		void cbConnect(bool success)					//driver function for connection. faulth??
 		{
 			if(success)
 			{
 				ROS_INFO("Connection established");
 				ping();
-				driver.setInterlace(interlace);
-				driver.requestHorizontalTable();
-				driver.requestVerticalTable();
-				driver.requestData(true, true);
+				driver.setInterlace(interlace);		//set param interlace equals 4. print
+				driver.requestHorizontalTable();	//print
+				driver.requestVerticalTable();		//print below
+				driver.requestData(true, true);		
 				driver.requestAuxData();
 				driver.receivePackets();
-				ROS_INFO("Communication started");
+				ROS_INFO("Communication started");	//...
 			}
 			else
 			{
-				ROS_ERROR("Connection failed");
+				ROS_ERROR("Connection failed");		//connection faild
 			}
 		};
-		hokuyo3d_node() :						//declaer node class
+		hokuyo3d_node() :						//constructor, declaer functions and variable
 			nh("~"),
 			timestampBase(0)
 		{
-			nh.param("interlace", interlace, 4);				//param set
+			nh.param("interlace", interlace, 4);				//param set and below
 			nh.param("ip", ip, std::string("192.168.0.10"));
 			nh.param("port", port, 10940);
 			nh.param("frame_id", frame_id, std::string("hokuyo3d"));
-			nh.param("range_min", range_min, 0.0);
+			nh.param("range_min", range_min, 0.0);				//...
 
 			std::string output_cycle;
-			nh.param("output_cycle", output_cycle, std::string("field"));
+			nh.param("output_cycle", output_cycle, std::string("field"));	//param output cycle
 
-			if(output_cycle.compare("frame") == 0)
+			if(output_cycle.compare("frame") == 0)			//compare with "~". as initial cycle, declaer frame, field and line cycle.
 				cycle = CYCLE_FRAME;
 			else if(output_cycle.compare("field") == 0)
 				cycle = CYCLE_FIELD;
 			else if(output_cycle.compare("line") == 0)
-				cycle = CYCLE_LINE;
+				cycle = CYCLE_LINE;				//...
 			else
 			{
-				ROS_ERROR("Unknown output_cycle value %s", output_cycle.c_str());
+				ROS_ERROR("Unknown output_cycle value %s", output_cycle.c_str());		//arg 
 				ros::shutdown();
 			}
 
 			driver.setTimeout(2.0);
 			ROS_INFO("Connecting to %s", ip.c_str());		//initial print and Callback function
 			driver.connect(ip.c_str(), port, 
-					boost::bind(&hokuyo3d_node::cbConnect, this, _1));
+					boost::bind(&hokuyo3d_node::cbConnect, this, _1));			//register functions and below
 			driver.registerCallback(
 					boost::bind(&hokuyo3d_node::cbPoint, this, _1, _2, _3, _4, _5, _6));
 			driver.registerAuxCallback(
 					boost::bind(&hokuyo3d_node::cbAux, this, _1, _2, _3, _4));
 			driver.registerPingCallback(
-					boost::bind(&hokuyo3d_node::cbPing, this, _1, _2));
+					boost::bind(&hokuyo3d_node::cbPing, this, _1, _2));			//...
 			field = 0;
 			frame = 0;
 			line = 0;
@@ -263,13 +263,13 @@ class hokuyo3d_node					//hokuyo3d_node class
 
 			enablePc = enablePc2 = false;
 			ros::SubscriberStatusCallback cbCon =
-				boost::bind(&hokuyo3d_node::cbSubscriber, this);
+				boost::bind(&hokuyo3d_node::cbSubscriber, this);	//subscriber bind cbCon
 
 			std::lock_guard<std::mutex> lock(connect_mutex);
 			pubPc = nh.advertise<sensor_msgs::PointCloud>("hokuyo_cloud", 5, cbCon, cbCon);
 			pubPc2 = nh.advertise<sensor_msgs::PointCloud2>("hokuyo_cloud2", 5, cbCon, cbCon);
 		};
-		~hokuyo3d_node()
+		~hokuyo3d_node()						//destructor
 		{
 			driver.requestAuxData(false);
 			driver.requestData(true, false);
@@ -277,13 +277,13 @@ class hokuyo3d_node					//hokuyo3d_node class
 			driver.poll();
 			ROS_INFO("Communication stoped");
 		};
-		void cbSubscriber()
+		void cbSubscriber()						//subscriber
 		{
 			std::lock_guard<std::mutex> lock(connect_mutex);
-			if(pubPc.getNumSubscribers() > 0)
+			if(pubPc.getNumSubscribers() > 0)			//pubPc(adver) have data
 			{
 				enablePc = true;
-				ROS_DEBUG("PointCloud output enabled");
+				ROS_DEBUG("PointCloud output enabled");		//print
 			}
 			else
 			{
@@ -301,7 +301,7 @@ class hokuyo3d_node					//hokuyo3d_node class
 				ROS_DEBUG("PointCloud2 output disabled");
 			}
 		}
-		bool poll()
+		bool poll()			//connection check
 		{
 			if(driver.poll())
 			{
@@ -310,7 +310,7 @@ class hokuyo3d_node					//hokuyo3d_node class
 			ROS_ERROR("Connection closed");
 			return false;
 		};
-		void ping()
+		void ping()			//print ping
 		{
 			driver.requestPing();
 			timePing = ros::Time::now();
@@ -363,7 +363,7 @@ int main(int argc, char **argv)
 	{
 		if(!node.poll()) break;
 		ros::spinOnce();
-		hokuyo3d_node::cbSubscriber;
+		//hokuyo3d_node::cbSubscriber;
 		wait.sleep();
 	}
 

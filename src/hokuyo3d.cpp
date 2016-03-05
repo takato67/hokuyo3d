@@ -44,6 +44,7 @@ class hokuyo3d_node					//hokuyo3d_node class
 {
 	public:
 		void cbPoint(					//detect points and pulish points
+				ROS_INFO("test cbPoint check");
 				const vssp::header &header, 			
 				const vssp::range_header &range_header, 
 				const vssp::range_index &range_index,
@@ -79,6 +80,7 @@ class hokuyo3d_node					//hokuyo3d_node class
 			}
 			if(enablePc2)					//pcl2 messages. almost like pcl.
 			{
+				ROS_INFO("test cbPoint enablePc2 check");
 				if(cloud2.data.size() == 0)
 				{
 					// Start packing PointCloud2 message
@@ -138,6 +140,7 @@ class hokuyo3d_node					//hokuyo3d_node class
 		};
 		void cbPing(const vssp::header &header, const std::chrono::microseconds &delayRead)			//time function
 		{
+			ROS_INFO("test cbPing check");
 			ros::Time now = ros::Time::now() - ros::Duration(delayRead.count() * 0.001 * 0.001);
 			ros::Duration delay = ((now - timePing)
 					- ros::Duration(header.send_time_ms * 0.001 - header.received_time_ms * 0.001)) * 0.5;
@@ -146,6 +149,7 @@ class hokuyo3d_node					//hokuyo3d_node class
 			else timestampBase += (base - timestampBase) * 0.01;
 		}
 		void cbAux(							//maybe imu message
+				ROS_INFO("test cbAux check");
 				const vssp::header &header, 
 				const vssp::aux_header &aux_header, 
 				const boost::shared_array<vssp::aux> &auxs,
@@ -188,6 +192,7 @@ class hokuyo3d_node					//hokuyo3d_node class
 		};
 		void cbConnect(bool success)					//driver function for connection. faulth??
 		{
+			ROS_INFO("test cbConnect check");
 			if(success)
 			{
 				ROS_INFO("Connection established");

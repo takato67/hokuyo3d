@@ -44,7 +44,6 @@ class hokuyo3d_node					//hokuyo3d_node class
 {
 	public:
 		void cbPoint(					//detect points and pulish points
-				ROS_INFO("test cbPoint check");
 				const vssp::header &header, 			
 				const vssp::range_header &range_header, 
 				const vssp::range_index &range_index,
@@ -52,6 +51,7 @@ class hokuyo3d_node					//hokuyo3d_node class
 				const boost::shared_array<vssp::xyzi> &points,
 				const std::chrono::microseconds &delayRead)
 		{
+			ROS_INFO("test cbPoint check");
 			if(timestampBase == ros::Time(0)) return;			//not run initially
 			// Pack scan data
 			if(enablePc)							//enablePc is flag
@@ -149,12 +149,12 @@ class hokuyo3d_node					//hokuyo3d_node class
 			else timestampBase += (base - timestampBase) * 0.01;
 		}
 		void cbAux(							//maybe imu message
-				ROS_INFO("test cbAux check");
 				const vssp::header &header, 
 				const vssp::aux_header &aux_header, 
 				const boost::shared_array<vssp::aux> &auxs,
 				const std::chrono::microseconds &delayRead)
 		{
+			ROS_INFO("test cbAux check");
 			if(timestampBase == ros::Time(0)) return;
 			ros::Time stamp = timestampBase + ros::Duration(aux_header.timestamp_ms * 0.001);
 
